@@ -7,48 +7,47 @@
 
   <style>
     :root { --brand:#f8a600; }
+    html, body { height: 100%; }
     body {
       margin: 0;
-      padding: 0;
       background: #fff8e1;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
     }
-    header {
-      text-align: center;
-      padding: 20px;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--brand);
-    }
+
+    /* Top title */
+    header { padding: 20px 16px; text-align: center; }
+    header h1 { margin: 0; font-size: 28px; font-weight: 700; color: var(--brand); }
+
+    /* Dead‑center the widget area */
     main {
-      flex: 1;
-      display: flex;
-      align-items: center;       /* vertical center */
-      justify-content: center;   /* horizontal center */
+      display: grid;
+      place-items: center;              /* centers both ways */
+      min-height: 0;                    /* prevents overflow weirdness */
     }
+
+    /* Wrapper constrains width and centers the host element */
+    .widget-wrap {
+      width: min(92vw, 520px);          /* responsive max width */
+      margin: 0 auto;                   /* center horizontally as a fallback */
+    }
+
+    /* Style the host element (we can’t touch shadow DOM, but this is enough) */
     elevenlabs-convai {
+      display: block;
       width: 100%;
-      max-width: 500px;
+      max-width: 520px;
+      margin: 0 auto;
+      transform: none;                  /* neutralize any inherited transforms */
     }
+
+    /* Continue button bottom-right */
     #continueBtn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      background: var(--brand);
-      color: #222;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,.15);
+      position: fixed; right: 20px; bottom: 20px;
+      padding: 12px 20px; border: 0; border-radius: 8px;
+      background: var(--brand); color: #222; font-weight: 700; font-size: 16px;
+      cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,.15);
     }
     #continueBtn:hover { filter: brightness(1.05); }
   </style>
@@ -62,7 +61,9 @@
   </header>
 
   <main>
-    <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
+    <div class="widget-wrap">
+      <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
+    </div>
   </main>
 
   <button id="continueBtn"
@@ -71,25 +72,9 @@
   </button>
 
   <script>
-    // Auto-click Accept in shadow DOM
-    function* allNodes(root=document) {
-      const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
-      while (walker.nextNode()) {
-        const el = walker.currentNode;
-        yield el;
-        if (el.shadowRoot) yield* allNodes(el.shadowRoot);
-      }
-    }
-    const acceptInterval = setInterval(() => {
-      for (const el of allNodes()) {
-        if (el.tagName === 'BUTTON' && el.textContent.trim().toLowerCase() === 'accept') {
-          el.click();
-          clearInterval(acceptInterval);
-          console.log('Auto-accepted ElevenLabs Terms');
-        }
-      }
-    }, 300);
+    /* Auto-accept T&Cs inside shadow DOM */
+    function* allNodes(root=document){const w=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT);while(w.nextNode()){const el=w.currentNode;yield el;if(el.shadowRoot) yield* allNodes(el.shadowRoot);}}
+    const acceptInterval=setInterval(()=>{for(const el of allNodes()){if(el.tagName==='BUTTON'&&el.textContent.trim().toLowerCase()==='accept'){el.click();clearInterval(acceptInterval);}}},300);
   </script>
 </body>
 </html>
-
