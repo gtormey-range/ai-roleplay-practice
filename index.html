@@ -43,5 +43,22 @@
 
   <!-- 👇 Replace agent-id below with your actual ID if it changes -->
   <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
+
+  <script>
+// Auto-click "Accept" on ElevenLabs T&C popup
+const autoAccept = setInterval(() => {
+  // Find button with text "Accept"
+  const buttons = document.querySelectorAll('button');
+  buttons.forEach(btn => {
+    if (btn.textContent.trim().toLowerCase() === 'accept') {
+      btn.click();
+      clearInterval(autoAccept);
+      console.log('ElevenLabs Terms auto-accepted');
+    }
+  });
+}, 500);
+</script>
+
+  
 </body>
 </html>
