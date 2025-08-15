@@ -1,64 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>AI Roleplay - Managing a Former Peer</title>
-
-  <!-- Meta tags to support microphone and embedding -->
-  <meta http-equiv="Permissions-Policy" content="microphone=()">
-  <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
-  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
+    :root { --brand:#f8a600; }
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #fff8e1;
-      margin: 0;
-      padding: 40px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      margin: 0; padding: 40px 16px;
+      background: #fff8e1; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      display: flex; min-height: 100vh; align-items: center; justify-content: center;
     }
-
-    h1 {
-      color: #f8a600;
-      font-size: 28px;
-      margin-bottom: 20px;
+    .wrap {
+      width: 100%; max-width: 720px;
+      display: flex; flex-direction: column; align-items: center; gap: 20px;
       text-align: center;
     }
+    h1 { margin: 0 0 8px; color: var(--brand); font-size: 28px; }
+    p.sub { margin: 0 0 12px; color: #5a4e2b; font-size: 14px; }
 
-    elevenlabs-convai {
-      width: 100%;
-      max-width: 600px;
+    elevenlabs-convai { width: 100%; max-width: 620px; }
+
+    .cta {
+      display: none;  /* shown after call completes */
+      padding: 12px 18px; border-radius: 10px; border: 0; cursor: pointer;
+      background: var(--brand); color: #222; font-weight: 700; font-size: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.12);
     }
+    .cta:hover { filter: brightness(1.05); }
   </style>
 
-  <!-- Load ElevenLabs Conversational Widget -->
+  <!-- ElevenLabs Conversational Widget -->
   <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
 </head>
-
 <body>
-  <h1>AI Roleplay: Managing a Former Peer</h1>
+  <div class="wrap">
+    <h1>AI Roleplay: Managing a Former Peer</h1>
+    <p class="sub">Start the practice conversation. When you're done, click Continue to return to the course.</p>
 
-  <!-- 👇 Replace agent-id below with your actual ID if it changes -->
-  <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
+    <!-- Replace with your own agent id if needed -->
+    <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
+
+    <button id="continueBtn" class="cta"
+      onclick="location.href='https://rangeleadership.talentlms.com/plus/courses/145/units/2134'">
+      Continue
+    </button>
+  </div>
 
   <script>
-// Auto-click "Accept" on ElevenLabs T&C popup
-const autoAccept = setInterval(() => {
-  // Find button with text "Accept"
-  const buttons = document.querySelectorAll('button');
-  buttons.forEach(btn => {
-    if (btn.textContent.trim().toLowerCase() === 'accept') {
-      btn.click();
-      clearInterval(autoAccept);
-      console.log('ElevenLabs Terms auto-accepted');
+    // ---------- Shadow DOM helpers ----------
+    function* allNodes(root=document) {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, null);
+      while (walker.nextNode()) {
+        const el = walker.currentNode;
+        yield el;
+        if (el.shadowRoot) yield* allNodes(el.shadowRoot);
+      }
     }
-  });
-}, 500);
-</script>
 
-  
+    function findButtonByText(txt) {
+      txt = txt.toLowerCase();
+      for (const el of allNodes()) {
+        if (el.tagName === 'BUTTON' && el.textContent.trim().toLowerCase() === txt) return el;
+      }
+      return null;
+    }
+
+    // ---------- Auto-accept T&C (runs until it succeeds) ----------
+    const acceptInterval = setInterval(() => {
+      const acceptBtn = findButtonByText('accept');
+      if (acceptBtn) {
+        acceptBtn.click();
+        clearInterval(acceptInterval);
+        // Optional: also hide the modal instantly if it flashed
+        for (const el of allNodes()) {
+          if (el.getAttribute && el.getAttribute('role') === 'dialog') { el.style.display = 'none'; }
+        }
+        console.log('Auto-accepted ElevenLabs Terms');
+      }
+    }, 300);
+
+    // ---------- Show "Continue" after a call has ended ----------
+    const convai = document.querySelector('elevenlabs-convai');
+    const continueBtn = document.getElementById('continueBtn');
+    let hasBeenInCall = false;
+
+    function watchCallState() {
+      const root = convai.shadowRoot || convai; // widget uses shadow DOM
+      const obs = new MutationObserver(() => {
+        // Detect in-call vs idle by button label in the widget UI
+        const endBtn = [...allNodes(root)].find(n => n.tagName === 'BUTTON' && /end call|hang up/i.test(n.textContent));
+        const startBtn = [...allNodes(root)].find(n => n.tagName === 'BUTTON' && /start call|start/i.test(n.textContent));
+
+        if (endBtn) hasBeenInCall = true; // we know they started
+        if (startBtn && hasBeenInCall) {
+          continueBtn.style.display = 'inline-block'; // show after they return to idle
+        }
+      });
+      obs.observe(root, { childList: true, subtree: true, characterData: true });
+    }
+
+    // Wait for the custom element to upgrade & attach its shadowRoot
+    const readyCheck = setInterval(() => {
+      if (convai && (convai.shadowRoot || customElements.get('elevenlabs-convai'))) {
+        clearInterval(readyCheck);
+        setTimeout(watchCallState, 300);
+      }
+    }, 200);
+  </script>
 </body>
 </html>
