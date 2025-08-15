@@ -20,7 +20,7 @@
     header { padding: 20px 16px; text-align: center; }
     header h1 { margin: 0; font-size: 28px; font-weight: 700; color: var(--brand); }
 
-    /* Dead‑center the widget area */
+    /* Dead-center the widget area */
     main {
       display: grid;
       place-items: center;              /* centers both ways */
@@ -41,9 +41,7 @@
       margin: 0 auto;
       transform: none;                  /* neutralize any inherited transforms */
     }
-
-  
-    
+  </style>
 
   <!-- ElevenLabs Conversational Widget -->
   <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
@@ -59,11 +57,24 @@
     </div>
   </main>
 
-
   <script>
     /* Auto-accept T&Cs inside shadow DOM */
-    function* allNodes(root=document){const w=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT);while(w.nextNode()){const el=w.currentNode;yield el;if(el.shadowRoot) yield* allNodes(el.shadowRoot);}}
-    const acceptInterval=setInterval(()=>{for(const el of allNodes()){if(el.tagName==='BUTTON'&&el.textContent.trim().toLowerCase()==='accept'){el.click();clearInterval(acceptInterval);}}},300);
+    function* allNodes(root=document){
+      const w=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT);
+      while(w.nextNode()){
+        const el=w.currentNode;
+        yield el;
+        if(el.shadowRoot) yield* allNodes(el.shadowRoot);
+      }
+    }
+    const acceptInterval=setInterval(()=>{
+      for(const el of allNodes()){
+        if(el.tagName==='BUTTON' && el.textContent.trim().toLowerCase()==='accept'){
+          el.click();
+          clearInterval(acceptInterval);
+        }
+      }
+    },300);
   </script>
 </body>
 </html>
