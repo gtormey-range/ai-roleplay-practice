@@ -8,33 +8,45 @@
   <style>
     :root { --brand:#f8a600; }
     body {
-      margin: 0; padding: 0;
+      margin: 0;
+      padding: 0;
       background: #fff8e1;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      display: flex; flex-direction: column; height: 100vh;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
     }
     header {
-      text-align: center; padding: 20px;
+      text-align: center;
+      padding: 20px;
     }
     header h1 {
-      margin: 0; font-size: 28px; font-weight: 700; color: var(--brand);
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--brand);
     }
     main {
       flex: 1;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      align-items: center;       /* vertical center */
+      justify-content: center;   /* horizontal center */
     }
     elevenlabs-convai {
-      width: 100%; max-width: 500px;
+      width: 100%;
+      max-width: 500px;
     }
     #continueBtn {
       position: fixed;
-      bottom: 20px; right: 20px;
+      bottom: 20px;
+      right: 20px;
       padding: 12px 20px;
-      border: none; border-radius: 8px;
-      background: var(--brand); color: #222;
-      font-size: 16px; font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      background: var(--brand);
+      color: #222;
+      font-size: 16px;
+      font-weight: bold;
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(0,0,0,.15);
     }
@@ -80,3 +92,4 @@
   </script>
 </body>
 </html>
+
