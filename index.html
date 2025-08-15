@@ -1,12 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>AI Roleplay Practice</title>
-    <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" type="text/javascript" async></script>
-  </head>
-  <body>
-    <h1 style="text-align: center;">AI Roleplay Practice</h1>
-    <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title>AI Roleplay - Managing a Former Peer</title>
+
+  <!-- Meta tags to support microphone and embedding -->
+  <meta http-equiv="Permissions-Policy" content="microphone=()">
+  <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fff8e1;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: #f8a600;
+      font-size: 28px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    elevenlabs-convai {
+      width: 100%;
+      max-width: 600px;
+    }
+  </style>
+
+  <!-- Load ElevenLabs Conversational Widget -->
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+</head>
+
+<body>
+  <h1>AI Roleplay: Managing a Former Peer</h1>
+
+  <!-- 👇 Replace agent-id below with your actual ID if it changes -->
+  <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
+</body>
 </html>
