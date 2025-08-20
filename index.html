@@ -7,7 +7,7 @@
   <style>
     :root { --brand:#f8a600; }
     html, body { height: 100%; }
-    body{
+    body {
       margin:0;
       background:#fff8e1;
       font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
@@ -15,57 +15,55 @@
       grid-template-rows:auto 1fr;
     }
 
-    /* Top title */
-    header{ padding:20px 16px; text-align:center; }
-    header h1{ margin:0; font-size:28px; font-weight:700; color:var(--brand); }
+    header { padding:20px 16px; text-align:center; }
+    header h1 { margin:0; font-size:28px; font-weight:700; color:var(--brand); }
 
-    /* Center the two-panel shell */
-    main{ display:grid; place-items:center; padding:16px; min-height:0; }
+    main {
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      padding:24px;
+    }
 
-    .shell{
-      width:min(94vw,1100px);
+    .shell {
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap:28px;
+      gap:32px;
+      max-width:1100px;
+      width:100%;
       align-items:start;
     }
-    @media (max-width: 900px){
+    @media(max-width:900px){
       .shell{ grid-template-columns:1fr; }
     }
 
-    /* Left panel card */
-    .helper{
+    .helper {
       background:#fff;
       border-radius:14px;
       box-shadow:0 8px 28px rgba(0,0,0,0.08);
-      padding:22px 22px;
+      padding:22px;
       line-height:1.55;
     }
-    .helper h2{ margin:0 0 10px 0; font-size:20px; color:#333; }
-    .helper p{ margin:0 0 10px 0; }
-    .helper ul{ margin:0 0 10px 18px; }
-    .helper strong{ color:var(--brand); }
-    .tip{ font-style:italic; }
+    .helper h2 { margin:0 0 10px; font-size:20px; color:#333; }
+    .helper p { margin:0 0 10px; }
+    .helper ul { margin:0 0 10px 18px; }
+    .helper strong { color:var(--brand); }
+    .tip { font-style:italic; }
 
-    /* Right panel: widget box feel */
-    .widget-wrap{
+    .widget-wrap {
       background:#fff;
       border-radius:14px;
       box-shadow:0 8px 28px rgba(0,0,0,0.08);
       padding:18px;
-      display:grid;
-      place-items:center;
+      display:flex;
+      justify-content:center;
     }
-    elevenlabs-convai{
+    elevenlabs-convai {
       display:block;
       width:100%;
       max-width:520px;
-      margin:0 auto;
-      transform:none;
     }
   </style>
-
-  <!-- ElevenLabs Conversational Widget -->
   <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
 </head>
 <body>
@@ -75,24 +73,19 @@
 
   <main>
     <div class="shell">
-      <!-- Left panel -->
-      <section class="helper" aria-label="Practice instructions">
+      <section class="helper">
         <p>In this interactive roleplay, you’ll step into a realistic conversation with <strong>Raina</strong> — your former peer, now your direct report. The AI will respond in real time, just like a real teammate might.</p>
-
         <h2>Helper Questions to Guide You</h2>
-        <p>Use these to spark your opening lines and keep the conversation on track:</p>
         <ul>
           <li>How can I acknowledge the shift from peer → manager with honesty?</li>
           <li>What’s one clear expectation I need to set?</li>
           <li>How can I show care personally and challenge directly?</li>
           <li>If Rachel resists, what’s one phrase I can use to stay calm and reset the tone?</li>
         </ul>
-
         <p class="tip">💡 Tip: Don’t aim for perfect. Aim for progress. This is your chance to experiment and practice before the real thing.</p>
-        <p><strong>Click the Phone Icon below to get started!</strong></p>
+        <p><strong>Click the Phone Icon to get started!</strong></p>
       </section>
 
-      <!-- Right panel -->
       <div class="widget-wrap">
         <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
       </div>
@@ -100,7 +93,6 @@
   </main>
 
   <script>
-    /* Auto-accept T&Cs inside shadow DOM */
     function* allNodes(root=document){
       const w=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT);
       while(w.nextNode()){
