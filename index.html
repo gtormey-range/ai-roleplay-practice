@@ -20,7 +20,7 @@
 
     main{ display:flex; justify-content:center; padding:24px; }
 
-    /* Two columns: helper (fluid) + bot (560px) */
+    /* Two columns: helper (fluid) + bot (fixed) */
     .shell{
       display:grid;
       grid-template-columns: 1fr 560px;
@@ -33,34 +33,28 @@
       .shell{ grid-template-columns:1fr; }
     }
 
-    .card{
+    /* LEFT: helper card */
+    .helper{
       background:#fff;
       border-radius:14px;
       box-shadow:0 8px 28px rgba(0,0,0,0.08);
       padding:22px;
       line-height:1.55;
     }
-
     .helper h2{ margin:0 0 10px; font-size:20px; color:#333; }
     .helper p{ margin:0 0 10px; }
     .helper ul{ margin:0 0 10px 18px; }
     .helper strong{ color:var(--brand); }
     .tip{ font-style:italic; }
 
-    /* Right card explicitly hosts the bot */
-    #bot-card{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      min-height:560px;
-    }
-    elevenlabs-convai{
-      display:block;
+    /* RIGHT: invisible anchor (no background) */
+    #bot-anchor{
       width:100%;
-      max-width:520px;
-      margin:0 auto;
-      transform:none;
+      min-height:560px;          /* space for the widget; no box shown */
     }
+
+    /* Base element (kept for initialization) */
+    elevenlabs-convai{ display:block; width:0; height:0; overflow:hidden; }
   </style>
 
   <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
@@ -72,8 +66,8 @@
 
   <main>
     <div class="shell">
-      <!-- LEFT: helper content -->
-      <section class="card helper" id="helper-card" aria-label="Practice instructions">
+      <!-- LEFT -->
+      <section class="helper" id="helper-card" aria-label="Practice instructions">
         <p>In this interactive roleplay, you’ll step into a realistic conversation with <strong>Raina</strong> — your former peer, now your direct report. The AI will respond in real time, just like a real teammate might.</p>
 
         <h2>Helper Questions to Guide You</h2>
@@ -88,23 +82,26 @@
         <p><strong>Click the Phone Icon to get started!</strong></p>
       </section>
 
-      <!-- RIGHT: chatbot -->
-      <section class="card" id="bot-card">
-        <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
-      </section>
+      <!-- RIGHT (no visible box) -->
+      <div id="bot-anchor" aria-hidden="true"></div>
     </div>
   </main>
 
+  <!-- Widget element -->
+  <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
+
   <script>
-    // Auto-accept T&Cs in the widget
+    /* Walk light + shadow DOM */
     function* allNodes(root=document){
-      const w=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT);
+      const w=document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
       while(w.nextNode()){
         const el=w.currentNode;
         yield el;
         if(el.shadowRoot) yield* allNodes(el.shadowRoot);
       }
     }
+
+    /* Auto-accept T&Cs */
     const acceptInterval=setInterval(()=>{
       for(const el of allNodes()){
         if(el.tagName==='BUTTON' && el.textContent.trim().toLowerCase()==='accept'){
@@ -113,6 +110,56 @@
         }
       }
     },300);
+
+    /* Find ElevenLabs dialog */
+    function getDialog(){
+      for(const el of allNodes()){
+        if(el.getAttribute && el.getAttribute('role')==='dialog'){
+          // Heuristic: it's the big rounded panel
+          const rect = el.getBoundingClientRect();
+          if(rect.width>300 && rect.height>300) return el;
+        }
+      }
+      return null;
+    }
+
+    /* Match anchor height to helper for clean layout */
+    function sizeAnchor(){
+      const helper=document.getElementById('helper-card');
+      const anchor=document.getElementById('bot-anchor');
+      if(helper && anchor){
+        anchor.style.minHeight = Math.max(560, helper.offsetHeight) + 'px';
+      }
+    }
+
+    /* Pin dialog to the right anchor */
+    function pinDialog(){
+      const dlg=getDialog();
+      const anchor=document.getElementById('bot-anchor');
+      if(!dlg || !anchor) return;
+
+      const r=anchor.getBoundingClientRect();
+      Object.assign(dlg.style,{
+        position:'fixed',
+        left: r.left+'px',
+        top:  r.top+'px',
+        width: r.width+'px',
+        height:r.height+'px',
+        transform:'none',
+        margin:'0',
+        zIndex:'1000'
+      });
+    }
+
+    /* Observe mutations to re-pin whenever widget re-renders */
+    const mo=new MutationObserver(()=>{ sizeAnchor(); pinDialog(); });
+    mo.observe(document.documentElement,{subtree:true,childList:true,attributes:false});
+
+    window.addEventListener('resize', ()=>{ sizeAnchor(); pinDialog(); });
+    window.addEventListener('scroll', ()=>{ pinDialog(); }, {passive:true});
+
+    // Initial pass after script loads
+    setTimeout(()=>{ sizeAnchor(); pinDialog(); }, 600);
   </script>
 </body>
 </html>
