@@ -20,7 +20,7 @@
 
     main{ display:flex; justify-content:center; padding:24px; }
 
-    /* Two columns: helper (fluid) + RIGHT slot (560px) */
+    /* Left helper (fluid) + Right bot area (fixed width) */
     .shell{
       display:grid;
       grid-template-columns: 1fr 560px;
@@ -31,10 +31,9 @@
     }
     @media (max-width: 980px){
       .shell{ grid-template-columns:1fr; }
-      #bot-slot{ min-height:560px; } /* keep space for phone icon on small screens */
+      #bot-slot{ min-height:560px; }
     }
 
-    /* Left helper card */
     .helper{
       background:#fff;
       border-radius:14px;
@@ -48,10 +47,10 @@
     .helper strong{ color:var(--brand); }
     .tip{ font-style:italic; }
 
-    /* Right slot has NO background (so no white box) */
+    /* Right target area — invisible, no background */
     #bot-slot{
       width:100%;
-      min-height:600px;   /* widget target height; JS syncs to helper */
+      min-height:600px;
     }
   </style>
 
@@ -64,7 +63,7 @@
 
   <main>
     <div class="shell">
-      <!-- LEFT: helper content -->
+      <!-- LEFT -->
       <section class="helper" id="helper-card" aria-label="Practice instructions">
         <p>In this interactive roleplay, you’ll step into a realistic conversation with <strong>Raina</strong> — your former peer, now your direct report. The AI will respond in real time, just like a real teammate might.</p>
 
@@ -80,16 +79,16 @@
         <p><strong>Click the Phone Icon to get started!</strong></p>
       </section>
 
-      <!-- RIGHT: invisible anchor for the widget overlay -->
+      <!-- RIGHT (no visible box) -->
       <div id="bot-slot" aria-hidden="true"></div>
     </div>
   </main>
 
-  <!-- Widget element (spawns the overlay) -->
+  <!-- Widget (spawns the overlay) -->
   <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
 
   <script>
-    /* Utilities: walk light + shadow DOM */
+    /* Walk light + open shadow DOM nodes */
     function* allNodes(root=document){
       const w=document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
       while(w.nextNode()){
@@ -109,18 +108,28 @@
       }
     },300);
 
-    /* Locate the ElevenLabs overlay dialog */
-    function getDialog(){
+    /* Find the big overlay panel */
+    function getOverlay(){
+      // Prefer ARIA dialog
+      const candidates=[...document.querySelectorAll('[role="dialog"],[aria-modal="true"]')];
+      for(const el of candidates){
+        const r=el.getBoundingClientRect();
+        if(r.width>300 && r.height>300) return el;
+      }
+      // Fallback: element that contains the "Powered by ElevenLabs" text
       for(const el of allNodes()){
-        if(el.getAttribute && el.getAttribute('role')==='dialog'){
-          const r = el.getBoundingClientRect();
-          if(r.width>300 && r.height>300) return el;
+        if(el.textContent && el.textContent.toLowerCase().includes('powered by elevenlabs')){
+          let n=el;
+          while(n && n!==document.body){
+            const r=n.getBoundingClientRect();
+            if(r.width>300 && r.height>300) return n;
+            n = n.parentElement;
+          }
         }
       }
       return null;
     }
 
-    /* Size right slot to match helper height (no white box shown) */
     function syncSlotHeight(){
       const helper=document.getElementById('helper-card');
       const slot=document.getElementById('bot-slot');
@@ -129,9 +138,8 @@
       }
     }
 
-    /* Pin overlay to the right slot */
-    function pinToRight(){
-      const dlg=getDialog();
+    function pinRight(){
+      const dlg=getOverlay();
       const slot=document.getElementById('bot-slot');
       if(!dlg || !slot) return;
 
@@ -142,20 +150,19 @@
         top:  r.top+'px',
         width: r.width+'px',
         height:r.height+'px',
+        right:'auto',
+        bottom:'auto',
         transform:'none',
         margin:'0',
         zIndex:'1000'
       });
     }
 
-    /* Re-pin whenever DOM changes or viewport moves */
-    const mo=new MutationObserver(()=>{ syncSlotHeight(); pinToRight(); });
-    mo.observe(document.documentElement,{subtree:true,childList:true,attributes:false});
-    window.addEventListener('resize', ()=>{ syncSlotHeight(); pinToRight(); });
-    window.addEventListener('scroll', ()=>{ pinToRight(); }, {passive:true});
-
-    /* Initial pass */
-    setTimeout(()=>{ syncSlotHeight(); pinToRight(); }, 700);
+    /* Keep forcing position (widget may recenter itself) */
+    syncSlotHeight();
+    const forcePin=setInterval(()=>{ syncSlotHeight(); pinRight(); }, 250);
+    window.addEventListener('resize', ()=>{ syncSlotHeight(); pinRight(); });
+    window.addEventListener('scroll', ()=>{ pinRight(); }, {passive:true});
   </script>
 </body>
 </html>
