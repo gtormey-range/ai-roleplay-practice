@@ -37,9 +37,8 @@
       color:#333;
     }
     .subhead-inner p{ margin:8px 0; }
-    .muted{ color:#666; }
 
-    /* Three-column arena: left panel, centered bot, right panel */
+    /* Three-column arena */
     .arena{
       box-sizing:border-box;
       padding:24px 16px 48px;
@@ -47,7 +46,7 @@
       max-width:1200px;
       margin:0 auto;
       display:grid;
-      grid-template-columns: 1fr minmax(340px, 520px) 1fr; /* L | BOT | R */
+      grid-template-columns: 1fr minmax(340px, 520px) 1fr;
       gap:24px;
       align-items:start;
     }
@@ -63,19 +62,19 @@
     .panel h2{ margin:0 0 10px; font-size:20px; }
     .panel ul{ margin:8px 0 0 18px; }
 
-    /* Center bot: no extra frame */
+    /* Center bot */
     .bot{
       display:flex;
       align-items:center;
       justify-content:center;
-      min-height:520px; /* gives space; widget sizes itself */
+      min-height:520px;
     }
     .bot > *{ width:100%; height:100%; border:0; }
 
     /* Responsive */
     @media (max-width: 980px){
       .arena{ grid-template-columns:1fr; }
-      .bot{ order:2; }           /* stack as: Left panel, Bot, Right panel */
+      .bot{ order:2; }
     }
   </style>
 </head>
@@ -84,7 +83,9 @@
     <h1>AI Roleplay: Managing a Former Peer</h1>
   </header>
 
-  <!-- Subheader text directly under title -->
+  <!-- Subheader -->
+  <section class="subhead" aria-label="Module description">
+    <div class="subhead-inner">
       <p>
         In this interactive roleplay, you’ll step into a realistic conversation with
         <strong>Raina</strong> — your former peer, now your direct report. The AI responds in real time
@@ -93,7 +94,7 @@
     </div>
   </section>
 
-  <!-- Left | Bot (center) | Right -->
+  <!-- Panels + Bot -->
   <main class="arena">
     <!-- LEFT panel -->
     <section class="panel" aria-label="Helper Questions">
@@ -105,7 +106,7 @@
       </ul>
     </section>
 
-    <!-- CENTER bot (kept centered) -->
+    <!-- CENTER bot -->
     <section class="bot" aria-label="ElevenLabs chatbot">
       <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
       <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
@@ -123,4 +124,3 @@
   </main>
 </body>
 </html>
-
