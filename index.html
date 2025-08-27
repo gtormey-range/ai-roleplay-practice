@@ -14,54 +14,68 @@
       font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
       color:var(--ink);
       display:grid;
-      grid-template-rows:auto 1fr;
+      grid-template-rows:auto auto 1fr;
       min-height:100dvh;
     }
 
     /* Title */
-    header{ padding:20px 16px; text-align:center; }
-    header h1{ margin:0; font-size:28px; font-weight:800; color:var(--brand); }
+    header{ padding:20px 16px 8px; text-align:center; }
+    header h1{ margin:0; font-size:32px; font-weight:900; color:var(--brand); }
 
-    /* Two-column layout */
-    .stage{
+    /* Subheader under the title */
+    .subhead{
+      box-sizing:border-box;
+      padding:0 16px 8px;
+      display:flex;
+      justify-content:center;
+    }
+    .subhead-inner{
+      max-width:900px;
+      text-align:center;
+      line-height:1.5;
+      font-size:16px;
+      color:#333;
+    }
+    .subhead-inner p{ margin:8px 0; }
+    .muted{ color:#666; }
+
+    /* Three-column arena: left panel, centered bot, right panel */
+    .arena{
       box-sizing:border-box;
       padding:24px 16px 48px;
       width:100%;
       max-width:1200px;
       margin:0 auto;
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr minmax(340px, 520px) 1fr; /* L | BOT | R */
       gap:24px;
       align-items:start;
     }
 
-    /* Left static box */
-    .info{
+    /* Side panels */
+    .panel{
       background:var(--card);
       border-radius:20px;
       box-shadow:0 12px 30px rgba(0,0,0,.08);
       padding:20px 24px;
-      line-height:1.45;
+      line-height:1.5;
     }
-    .info h2{ margin:0 0 8px; font-size:20px; }
-    .info p{ margin:0 0 12px; }
-    .callout{ color:#666; font-size:14px; }
+    .panel h2{ margin:0 0 10px; font-size:20px; }
+    .panel ul{ margin:8px 0 0 18px; }
 
-    /* Right bot directly */
+    /* Center bot: no extra frame */
     .bot{
       display:flex;
-      align-items:flex-start;
+      align-items:center;
       justify-content:center;
+      min-height:520px; /* gives space; widget sizes itself */
     }
-    .bot > *{
-      width:100%;
-      height:100%;
-      border:0;
-    }
+    .bot > *{ width:100%; height:100%; border:0; }
 
     /* Responsive */
-    @media (max-width: 900px){
-      .stage{ grid-template-columns:1fr; }
+    @media (max-width: 980px){
+      .arena{ grid-template-columns:1fr; }
+      .bot{ order:2; }           /* stack as: Left panel, Bot, Right panel */
     }
   </style>
 </head>
@@ -70,39 +84,50 @@
     <h1>AI Roleplay: Managing a Former Peer</h1>
   </header>
 
-  <main class="stage">
-    <!-- LEFT -->
-    <section class="info" aria-label="Overview">
-      <h2>What you’ll do</h2>
+  <!-- Subheader text directly under title -->
+  <section class="subhead" aria-label="What you'll do">
+    <div class="subhead-inner">
+      <p><strong>What you’ll do</strong></p>
       <p>
         In this interactive roleplay, you’ll step into a realistic conversation with
         <strong>Raina</strong> — your former peer, now your direct report. The AI responds in real time
         as a real teammate might.
       </p>
-      <p class="callout">
-        Goal: practice setting new norms, clarifying expectations, and handling role changes with empathy and clarity.
+      <p class="muted">
+        <strong>Goal:</strong> practice setting new norms, clarifying expectations, and handling role changes
+        with empathy and clarity.
       </p>
+    </div>
+  </section>
 
-      <h3>Helper Questions</h3>
+  <!-- Left | Bot (center) | Right -->
+  <main class="arena">
+    <!-- LEFT panel -->
+    <section class="panel" aria-label="Helper Questions">
+      <h2>Helper Questions</h2>
       <ul>
         <li>How will you acknowledge the shift from peer → manager?</li>
         <li>What expectations do you need to reset today?</li>
         <li>Where could friction show up, and how will you surface it?</li>
       </ul>
+    </section>
 
-      <h3>Tips</h3>
+    <!-- CENTER bot (kept centered) -->
+    <section class="bot" aria-label="ElevenLabs chatbot">
+      <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
+      <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+    </section>
+
+    <!-- RIGHT panel -->
+    <section class="panel" aria-label="Tips">
+      <h2>Tips</h2>
       <ul>
         <li>Lead with curiosity. Ask before telling.</li>
         <li>State expectations as behaviors and outcomes.</li>
         <li>Close with agreements, owners, and next steps.</li>
       </ul>
     </section>
-
-    <!-- RIGHT -->
-    <section class="bot" aria-label="ElevenLabs chatbot">
-      <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
-      <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
-    </section>
   </main>
 </body>
 </html>
+
