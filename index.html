@@ -1,104 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>AI Roleplay - Managing a Former Peer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root { --brand:#f8a600; }
-    html, body { height:100%; }
-    body{
-      margin:0;
-      background:#fff8e1;
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-      display:grid;
-      grid-template-rows:auto 1fr;
+header { padding: 20px 16px; text-align: center; }
+header h1 { margin: 0; font-size: 28px; font-weight: 700; color: var(--brand); }
+
+    /* Dead‑center the widget area */
+    /* Dead-center the widget area */
+main {
+display: grid;
+place-items: center;              /* centers both ways */
+@@ -41,15 +41,6 @@
+margin: 0 auto;
+transform: none;                  /* neutralize any inherited transforms */
+}
+
+    /* Continue button bottom-right */
+    #continueBtn {
+      position: fixed; right: 20px; bottom: 20px;
+      padding: 12px 20px; border: 0; border-radius: 8px;
+      background: var(--brand); color: #222; font-weight: 700; font-size: 16px;
+      cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,.15);
     }
+    #continueBtn:hover { filter: brightness(1.05); }
+</style>
 
-    header{ padding:20px 16px; text-align:center; }
-    header h1{ margin:0; font-size:28px; font-weight:700; color:var(--brand); }
+<!-- ElevenLabs Conversational Widget -->
+@@ -66,16 +57,24 @@ <h1>AI Roleplay: Managing a Former Peer</h1>
+</div>
+</main>
 
-    main{ display:flex; justify-content:center; padding:24px; }
+  <button id="continueBtn"
+    onclick="location.href='https://rangeleadership.talentlms.com/plus/courses/145/units/2134'">
+    Continue
+  </button>
 
-    /* Left helper (fluid) + Right bot area (fixed width) */
-    .shell{
-      display:grid;
-      grid-template-columns: 1fr 560px;
-      gap:32px;
-      width:100%;
-      max-width:1100px;
-      align-items:start;
-    }
-    @media (max-width: 980px){
-      .shell{ grid-template-columns:1fr; }
-      #bot-slot{ min-height:560px; }
-    }
-
-    .helper{
-      background:#fff;
-      border-radius:14px;
-      box-shadow:0 8px 28px rgba(0,0,0,0.08);
-      padding:22px;
-      line-height:1.55;
-    }
-    .helper h2{ margin:0 0 10px; font-size:20px; color:#333; }
-    .helper p{ margin:0 0 10px; }
-    .helper ul{ margin:0 0 10px 18px; }
-    .helper strong{ color:var(--brand); }
-    .tip{ font-style:italic; }
-
-    /* Right target area — invisible, no background */
-    #bot-slot{
-      width:100%;
-      min-height:600px;
-    }
-  </style>
-
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
-</head>
-<body>
-  <header>
-    <h1>AI Roleplay: Managing a Former Peer</h1>
-  </header>
-
-  <main>
-    <div class="shell">
-      <!-- LEFT -->
-      <section class="helper" id="helper-card" aria-label="Practice instructions">
-        <p>In this interactive roleplay, you’ll step into a realistic conversation with <strong>Raina</strong> — your former peer, now your direct report. The AI will respond in real time, just like a real teammate might.</p>
-
-        <h2>Helper Questions to Guide You</h2>
-        <ul>
-          <li>How can I acknowledge the shift from peer → manager with honesty?</li>
-          <li>What’s one clear expectation I need to set?</li>
-          <li>How can I show care personally and challenge directly?</li>
-          <li>If Rachel resists, what’s one phrase I can use to stay calm and reset the tone?</li>
-        </ul>
-
-        <p class="tip">💡 Tip: Don’t aim for perfect. Aim for progress. This is your chance to experiment and practice before the real thing.</p>
-        <p><strong>Click the Phone Icon to get started!</strong></p>
-      </section>
-
-      <!-- RIGHT (no visible box) -->
-      <div id="bot-slot" aria-hidden="true"></div>
-    </div>
-  </main>
-
-  <!-- Widget (spawns the overlay) -->
-  <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
-
-  <script>
-    /* Walk light + open shadow DOM nodes */
+<script>
+/* Auto-accept T&Cs inside shadow DOM */
+    function* allNodes(root=document){const w=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT);while(w.nextNode()){const el=w.currentNode;yield el;if(el.shadowRoot) yield* allNodes(el.shadowRoot);}}
+    const acceptInterval=setInterval(()=>{for(const el of allNodes()){if(el.tagName==='BUTTON'&&el.textContent.trim().toLowerCase()==='accept'){el.click();clearInterval(acceptInterval);}}},300);
     function* allNodes(root=document){
-      const w=document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
+      const w=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT);
       while(w.nextNode()){
         const el=w.currentNode;
         yield el;
         if(el.shadowRoot) yield* allNodes(el.shadowRoot);
       }
     }
-
-    /* Auto-accept T&Cs */
     const acceptInterval=setInterval(()=>{
       for(const el of allNodes()){
         if(el.tagName==='BUTTON' && el.textContent.trim().toLowerCase()==='accept'){
@@ -107,62 +51,6 @@
         }
       }
     },300);
-
-    /* Find the big overlay panel */
-    function getOverlay(){
-      // Prefer ARIA dialog
-      const candidates=[...document.querySelectorAll('[role="dialog"],[aria-modal="true"]')];
-      for(const el of candidates){
-        const r=el.getBoundingClientRect();
-        if(r.width>300 && r.height>300) return el;
-      }
-      // Fallback: element that contains the "Powered by ElevenLabs" text
-      for(const el of allNodes()){
-        if(el.textContent && el.textContent.toLowerCase().includes('powered by elevenlabs')){
-          let n=el;
-          while(n && n!==document.body){
-            const r=n.getBoundingClientRect();
-            if(r.width>300 && r.height>300) return n;
-            n = n.parentElement;
-          }
-        }
-      }
-      return null;
-    }
-
-    function syncSlotHeight(){
-      const helper=document.getElementById('helper-card');
-      const slot=document.getElementById('bot-slot');
-      if(helper && slot){
-        slot.style.minHeight = Math.max(560, helper.offsetHeight) + 'px';
-      }
-    }
-
-    function pinRight(){
-      const dlg=getOverlay();
-      const slot=document.getElementById('bot-slot');
-      if(!dlg || !slot) return;
-
-      const r=slot.getBoundingClientRect();
-      Object.assign(dlg.style,{
-        position:'fixed',
-        left: r.left+'px',
-        top:  r.top+'px',
-        width: r.width+'px',
-        height:r.height+'px',
-        right:'auto',
-        bottom:'auto',
-        transform:'none',
-        margin:'0',
-        zIndex:'1000'
-      });
-    }
-
-    /* Keep forcing position (widget may recenter itself) */
-    syncSlotHeight();
-    const forcePin=setInterval(()=>{ syncSlotHeight(); pinRight(); }, 250);
-    window.addEventListener('resize', ()=>{ syncSlotHeight(); pinRight(); });
-    window.addEventListener('scroll', ()=>{ pinRight(); }, {passive:true});
-  </script>
+</script>
 </body>
 </html>
