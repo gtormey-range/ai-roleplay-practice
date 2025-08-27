@@ -2,179 +2,114 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>AI Roleplay - Managing a Former Peer</title>
+  <title>AI Roleplay: Managing a Former Peer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root { --brand:#f8a600; }
+    :root { --brand:#f8a600; --bg:#fff8e1; --card:#ffffff; --ink:#222; }
+
     html, body { height:100%; }
     body{
       margin:0;
-      background:#fff8e1;
+      background:var(--bg);
       font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--ink);
       display:grid;
       grid-template-rows:auto 1fr;
+      min-height:100dvh;
     }
 
     /* Title */
     header{ padding:20px 16px; text-align:center; }
-    header h1{ margin:0; font-size:28px; font-weight:700; color:var(--brand); }
+    header h1{ margin:0; font-size:28px; font-weight:800; color:var(--brand); }
 
-    /* Two-column shell */
-    main{ display:flex; justify-content:center; padding:24px; }
-    .shell{
-      display:grid;
-      grid-template-columns: 1fr 560px;   /* left flexible, right fixed */
-      gap:32px;
+    /* Two-column layout */
+    .stage{
+      box-sizing:border-box;
+      padding:24px 16px 48px;
       width:100%;
-      max-width:1100px;
+      max-width:1200px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:24px;
       align-items:start;
     }
-    @media (max-width:980px){
-      .shell{ grid-template-columns:1fr; }
-      #bot-slot{ min-height:560px; }      /* keep space for phone icon on small screens */
-    }
 
-    /* Left helper card */
-    .helper{
-      background:#fff;
-      border-radius:14px;
-      box-shadow:0 8px 28px rgba(0,0,0,0.08);
-      padding:22px;
-      line-height:1.55;
+    /* Left static box */
+    .info{
+      background:var(--card);
+      border-radius:20px;
+      box-shadow:0 12px 30px rgba(0,0,0,.08);
+      padding:20px 24px;
+      line-height:1.45;
     }
-    .helper h2{ margin:0 0 10px; font-size:20px; color:#333; }
-    .helper p{ margin:0 0 10px; }
-    .helper ul{ margin:0 0 10px 18px; }
-    .helper strong{ color:var(--brand); }
-    .tip{ font-style:italic; }
+    .info h2{ margin:0 0 8px; font-size:20px; }
+    .info p{ margin:0 0 12px; }
+    .callout{ color:#666; font-size:14px; }
 
-    /* Right slot has NO background (so no white box) */
-    #bot-slot{
+    /* Right bot container */
+    .bot{
+      background:var(--card);
+      border-radius:20px;
+      box-shadow:0 12px 30px rgba(0,0,0,.08);
+      padding:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:560px;
+    }
+    .bot > *{
       width:100%;
-      min-height:600px;                   /* target height for overlay */
+      height:100%;
+      border:0;
+      border-radius:14px;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px){
+      .stage{ grid-template-columns:1fr; }
+      .bot{ min-height:520px; }
     }
   </style>
-
-  <!-- ElevenLabs Conversational Widget -->
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
 </head>
 <body>
   <header>
     <h1>AI Roleplay: Managing a Former Peer</h1>
   </header>
 
-  <main>
-    <div class="shell">
-      <!-- LEFT: helper card -->
-      <section class="helper" id="helper-card" aria-label="Practice instructions">
-        <p>In this interactive roleplay, you’ll step into a realistic conversation with <strong>Raina</strong> — your former peer, now your direct report. The AI will respond in real time, just like a real teammate might.</p>
+  <main class="stage">
+    <!-- LEFT -->
+    <section class="info" aria-label="Overview">
+      <h2>What you’ll do</h2>
+      <p>
+        In this interactive roleplay, you’ll step into a realistic conversation with
+        <strong>Raina</strong> — your former peer, now your direct report. The AI responds in real time
+        as a real teammate might.
+      </p>
+      <p class="callout">
+        Goal: practice setting new norms, clarifying expectations, and handling role changes with empathy and clarity.
+      </p>
 
-        <h2>Helper Questions to Guide You</h2>
-        <ul>
-          <li>How can I acknowledge the shift from peer → manager with honesty?</li>
-          <li>What’s one clear expectation I need to set?</li>
-          <li>How can I show care personally and challenge directly?</li>
-          <li>If Rachel resists, what’s one phrase I can use to stay calm and reset the tone?</li>
-        </ul>
+      <h3>Helper Questions</h3>
+      <ul>
+        <li>How will you acknowledge the shift from peer → manager?</li>
+        <li>What expectations do you need to reset today?</li>
+        <li>Where could friction show up, and how will you surface it?</li>
+      </ul>
 
-        <p class="tip">💡 Tip: Don’t aim for perfect. Aim for progress. This is your chance to experiment and practice before the real thing.</p>
-        <p><strong>Click the Phone Icon to get started!</strong></p>
-      </section>
+      <h3>Tips</h3>
+      <ul>
+        <li>Lead with curiosity. Ask before telling.</li>
+        <li>State expectations as behaviors and outcomes.</li>
+        <li>Close with agreements, owners, and next steps.</li>
+      </ul>
+    </section>
 
-      <!-- RIGHT: invisible anchor for the widget (no background) -->
-      <div id="bot-slot" aria-hidden="true"></div>
-    </div>
+    <!-- RIGHT -->
+    <section class="bot" aria-label="ElevenLabs chatbot">
+      <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
+      <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+    </section>
   </main>
-
-  <!-- The widget element that spawns the overlay -->
-  <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
-
-  <script>
-    /* Utility: iterate light + open shadow DOM safely */
-    function* walkElements(root=document){
-      const tw=document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
-      while(tw.nextNode()){
-        const el=tw.currentNode;
-        yield el;
-        if(el.shadowRoot) yield* walkElements(el.shadowRoot);
-      }
-    }
-
-    /* Auto-accept in-widget T&Cs if shown */
-    const tncTimer=setInterval(()=>{
-      for(const el of walkElements()){
-        if(el.tagName==='BUTTON' && el.textContent.trim().toLowerCase()==='accept'){
-          el.click(); clearInterval(tncTimer);
-        }
-      }
-    },300);
-
-    /* Find the ElevenLabs overlay panel only (avoid touching page elements) */
-    function findElevenOverlay(){
-      // Prefer explicit ARIA dialog with large size.
-      const cands=[...document.querySelectorAll('[role="dialog"][aria-modal="true"]')];
-      for(const el of cands){
-        const r=el.getBoundingClientRect();
-        // ElevenLabs overlay is large and has rounded panel inside.
-        if(r.width>300 && r.height>300 && el.innerHTML.toLowerCase().includes('elevenlabs')){
-          return el;
-        }
-      }
-      // Fallback: search for the footer text and climb to its panel.
-      for(const el of walkElements()){
-        if(el.textContent && el.textContent.toLowerCase().includes('powered by elevenlabs')){
-          let n=el;
-          while(n && n!==document.body){
-            const r=n.getBoundingClientRect();
-            if(r.width>300 && r.height>300) return n;
-            n=n.parentElement;
-          }
-        }
-      }
-      return null;
-    }
-
-    function syncSlotHeight(){
-      const helper=document.getElementById('helper-card');
-      const slot=document.getElementById('bot-slot');
-      if(helper && slot){
-        slot.style.minHeight = Math.max(560, helper.offsetHeight) + 'px';
-      }
-    }
-
-    function pinOverlayToRight(){
-      const overlay=findElevenOverlay();
-      const slot=document.getElementById('bot-slot');
-      if(!overlay || !slot) return;
-
-      const r=slot.getBoundingClientRect();
-      const styles={
-        position:'fixed',
-        left: `${r.left}px`,
-        top:  `${r.top}px`,
-        width:`${r.width}px`,
-        height:`${r.height}px`,
-        transform:'none',
-        margin:'0',
-        zIndex:'1000'
-      };
-      for(const k in styles) overlay.style.setProperty(k, styles[k], 'important');
-    }
-
-    /* Observe only for overlay creation, then bind resize. No constant reposition spam. */
-    const mo=new MutationObserver(()=>{
-      const overlay=findElevenOverlay();
-      if(overlay){
-        syncSlotHeight();
-        pinOverlayToRight();
-        window.addEventListener('resize', ()=>{ syncSlotHeight(); pinOverlayToRight(); });
-        mo.disconnect(); // stop observing once pinned
-      }
-    });
-    mo.observe(document.body, { childList:true, subtree:true });
-
-    // Initial sizing on load (in case overlay is already present)
-    window.addEventListener('load', ()=>{ syncSlotHeight(); pinOverlayToRight(); });
-  </script>
 </body>
 </html>
