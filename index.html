@@ -15,25 +15,26 @@
       grid-template-rows:auto 1fr;
     }
 
+    /* Title */
     header{ padding:20px 16px; text-align:center; }
     header h1{ margin:0; font-size:28px; font-weight:700; color:var(--brand); }
 
+    /* Two-column shell */
     main{ display:flex; justify-content:center; padding:24px; }
-
-    /* Left helper (fluid) + Right bot area (fixed width) */
     .shell{
       display:grid;
-      grid-template-columns: 1fr 560px;
+      grid-template-columns: 1fr 560px;   /* left flexible, right fixed */
       gap:32px;
       width:100%;
       max-width:1100px;
       align-items:start;
     }
-    @media (max-width: 980px){
+    @media (max-width:980px){
       .shell{ grid-template-columns:1fr; }
-      #bot-slot{ min-height:560px; }
+      #bot-slot{ min-height:560px; }      /* keep space for phone icon on small screens */
     }
 
+    /* Left helper card */
     .helper{
       background:#fff;
       border-radius:14px;
@@ -47,13 +48,14 @@
     .helper strong{ color:var(--brand); }
     .tip{ font-style:italic; }
 
-    /* Right target area — invisible, no background */
+    /* Right slot has NO background (so no white box) */
     #bot-slot{
       width:100%;
-      min-height:600px;
+      min-height:600px;                   /* target height for overlay */
     }
   </style>
 
+  <!-- ElevenLabs Conversational Widget -->
   <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
 </head>
 <body>
@@ -63,7 +65,7 @@
 
   <main>
     <div class="shell">
-      <!-- LEFT -->
+      <!-- LEFT: helper card -->
       <section class="helper" id="helper-card" aria-label="Practice instructions">
         <p>In this interactive roleplay, you’ll step into a realistic conversation with <strong>Raina</strong> — your former peer, now your direct report. The AI will respond in real time, just like a real teammate might.</p>
 
@@ -79,51 +81,53 @@
         <p><strong>Click the Phone Icon to get started!</strong></p>
       </section>
 
-      <!-- RIGHT (no visible box) -->
+      <!-- RIGHT: invisible anchor for the widget (no background) -->
       <div id="bot-slot" aria-hidden="true"></div>
     </div>
   </main>
 
-  <!-- Widget (spawns the overlay) -->
+  <!-- The widget element that spawns the overlay -->
   <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
 
   <script>
-    /* Walk light + open shadow DOM nodes */
-    function* allNodes(root=document){
-      const w=document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
-      while(w.nextNode()){
-        const el=w.currentNode;
+    /* Utility: iterate light + open shadow DOM safely */
+    function* walkElements(root=document){
+      const tw=document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
+      while(tw.nextNode()){
+        const el=tw.currentNode;
         yield el;
-        if(el.shadowRoot) yield* allNodes(el.shadowRoot);
+        if(el.shadowRoot) yield* walkElements(el.shadowRoot);
       }
     }
 
-    /* Auto-accept T&Cs */
-    const acceptInterval=setInterval(()=>{
-      for(const el of allNodes()){
+    /* Auto-accept in-widget T&Cs if shown */
+    const tncTimer=setInterval(()=>{
+      for(const el of walkElements()){
         if(el.tagName==='BUTTON' && el.textContent.trim().toLowerCase()==='accept'){
-          el.click();
-          clearInterval(acceptInterval);
+          el.click(); clearInterval(tncTimer);
         }
       }
     },300);
 
-    /* Find the big overlay panel */
-    function getOverlay(){
-      // Prefer ARIA dialog
-      const candidates=[...document.querySelectorAll('[role="dialog"],[aria-modal="true"]')];
-      for(const el of candidates){
+    /* Find the ElevenLabs overlay panel only (avoid touching page elements) */
+    function findElevenOverlay(){
+      // Prefer explicit ARIA dialog with large size.
+      const cands=[...document.querySelectorAll('[role="dialog"][aria-modal="true"]')];
+      for(const el of cands){
         const r=el.getBoundingClientRect();
-        if(r.width>300 && r.height>300) return el;
+        // ElevenLabs overlay is large and has rounded panel inside.
+        if(r.width>300 && r.height>300 && el.innerHTML.toLowerCase().includes('elevenlabs')){
+          return el;
+        }
       }
-      // Fallback: element that contains the "Powered by ElevenLabs" text
-      for(const el of allNodes()){
+      // Fallback: search for the footer text and climb to its panel.
+      for(const el of walkElements()){
         if(el.textContent && el.textContent.toLowerCase().includes('powered by elevenlabs')){
           let n=el;
           while(n && n!==document.body){
             const r=n.getBoundingClientRect();
             if(r.width>300 && r.height>300) return n;
-            n = n.parentElement;
+            n=n.parentElement;
           }
         }
       }
@@ -138,31 +142,39 @@
       }
     }
 
-    function pinRight(){
-      const dlg=getOverlay();
+    function pinOverlayToRight(){
+      const overlay=findElevenOverlay();
       const slot=document.getElementById('bot-slot');
-      if(!dlg || !slot) return;
+      if(!overlay || !slot) return;
 
       const r=slot.getBoundingClientRect();
-      Object.assign(dlg.style,{
+      const styles={
         position:'fixed',
-        left: r.left+'px',
-        top:  r.top+'px',
-        width: r.width+'px',
-        height:r.height+'px',
-        right:'auto',
-        bottom:'auto',
+        left: `${r.left}px`,
+        top:  `${r.top}px`,
+        width:`${r.width}px`,
+        height:`${r.height}px`,
         transform:'none',
         margin:'0',
         zIndex:'1000'
-      });
+      };
+      for(const k in styles) overlay.style.setProperty(k, styles[k], 'important');
     }
 
-    /* Keep forcing position (widget may recenter itself) */
-    syncSlotHeight();
-    const forcePin=setInterval(()=>{ syncSlotHeight(); pinRight(); }, 250);
-    window.addEventListener('resize', ()=>{ syncSlotHeight(); pinRight(); });
-    window.addEventListener('scroll', ()=>{ pinRight(); }, {passive:true});
+    /* Observe only for overlay creation, then bind resize. No constant reposition spam. */
+    const mo=new MutationObserver(()=>{
+      const overlay=findElevenOverlay();
+      if(overlay){
+        syncSlotHeight();
+        pinOverlayToRight();
+        window.addEventListener('resize', ()=>{ syncSlotHeight(); pinOverlayToRight(); });
+        mo.disconnect(); // stop observing once pinned
+      }
+    });
+    mo.observe(document.body, { childList:true, subtree:true });
+
+    // Initial sizing on load (in case overlay is already present)
+    window.addEventListener('load', ()=>{ syncSlotHeight(); pinOverlayToRight(); });
   </script>
 </body>
 </html>
