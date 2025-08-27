@@ -4,42 +4,54 @@
   <meta charset="UTF-8" />
   <title>AI Roleplay - Managing a Former Peer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <style>
     :root { --brand:#f8a600; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      background: #fff8e1;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      display: grid;
-      grid-template-rows: auto 1fr;
+    html, body { height:100%; }
+    body{
+      margin:0;
+      background:#fff8e1;
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      display:grid;
+      grid-template-rows:auto 1fr;
     }
 
-    /* Top title */
-    header { padding: 20px 16px; text-align: center; }
-    header h1 { margin: 0; font-size: 28px; font-weight: 700; color: var(--brand); }
+    /* Title */
+    header{ padding:20px 16px; text-align:center; }
+    header h1{ margin:0; font-size:28px; font-weight:700; color:var(--brand); }
 
-    /* Dead-center the widget area */
-    main {
-      display: grid;
-      place-items: center;              /* centers both ways */
-      min-height: 0;                    /* prevents overflow weirdness */
+    /* Two-column shell */
+    main{ display:flex; justify-content:center; padding:24px; }
+    .shell{
+      display:grid;
+      grid-template-columns: 560px 1fr;   /* LEFT fixed, RIGHT flexible */
+      gap:32px;
+      width:100%;
+      max-width:1100px;
+      align-items:start;
+    }
+    @media (max-width:980px){
+      .shell{ grid-template-columns:1fr; }
+      #bot-slot{ min-height:560px; }
     }
 
-    /* Wrapper constrains width and centers the host element */
-    .widget-wrap {
-      width: min(92vw, 520px);          /* responsive max width */
-      margin: 0 auto;                   /* center horizontally as a fallback */
+    /* LEFT card */
+    .helper{
+      background:#fff;
+      border-radius:14px;
+      box-shadow:0 8px 28px rgba(0,0,0,0.08);
+      padding:22px;
+      line-height:1.55;
     }
+    .helper h2{ margin:0 0 10px; font-size:20px; color:#333; }
+    .helper p{ margin:0 0 10px; }
+    .helper ul{ margin:0 0 10px 18px; }
+    .helper strong{ color:var(--brand); }
+    .tip{ font-style:italic; }
 
-    /* Style the host element (we can’t touch shadow DOM, but this is enough) */
-    elevenlabs-convai {
-      display: block;
-      width: 100%;
-      max-width: 520px;
-      margin: 0 auto;
-      transform: none;                  /* neutralize any inherited transforms */
+    /* RIGHT anchor (no background) */
+    #bot-slot{
+      width:100%;
+      min-height:600px;
     }
   </style>
 
@@ -52,29 +64,158 @@
   </header>
 
   <main>
-    <div class="widget-wrap">
-      <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
+    <div class="shell">
+      <!-- LEFT -->
+      <section class="helper" id="helper-card" aria-label="Practice instructions">
+        <p>In this interactive roleplay, you’ll step into a realistic conversation with <strong>Raina</strong> — your former peer, now your direct report. The AI will respond in real time, just like a real teammate might.</p>
+
+        <h2>Helper Questions to Guide You</h2>
+        <ul>
+          <li>How can I acknowledge the shift from peer → manager with honesty?</li>
+          <li>What’s one clear expectation I need to set?</li>
+          <li>How can I show care personally and challenge directly?</li>
+          <li>If Rachel resists, what’s one phrase I can use to stay calm and reset the tone?</li>
+        </ul>
+
+        <p class="tip">💡 Tip: Don’t aim for perfect. Aim for progress. This is your chance to experiment and practice before the real thing.</p>
+        <p><strong>Click the Phone Icon to get started!</strong></p>
+      </section>
+
+      <!-- RIGHT: overlay target -->
+      <div id="bot-slot" aria-hidden="true"></div>
     </div>
   </main>
 
+  <!-- Widget element (spawns the overlay) -->
+  <elevenlabs-convai agent-id="agent_1601k2pmcwhhej5rah35f46hy3qk"></elevenlabs-convai>
+
   <script>
-    /* Auto-accept T&Cs inside shadow DOM */
-    function* allNodes(root=document){
-      const w=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT);
-      while(w.nextNode()){
-        const el=w.currentNode;
+    /* -------- DOM helpers (walk light + shadow DOM) -------- */
+    function* walk(root=document){
+      const tw=document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
+      while(tw.nextNode()){
+        const el=tw.currentNode;
         yield el;
-        if(el.shadowRoot) yield* allNodes(el.shadowRoot);
+        if(el.shadowRoot) yield* walk(el.shadowRoot);
       }
     }
-    const acceptInterval=setInterval(()=>{
-      for(const el of allNodes()){
-        if(el.tagName==='BUTTON' && el.textContent.trim().toLowerCase()==='accept'){
-          el.click();
-          clearInterval(acceptInterval);
+
+    /* -------- Layout: pin overlay to RIGHT anchor -------- */
+    function findOverlay(){
+      // Prefer ARIA dialog that contains ElevenLabs strings
+      const ds=[...document.querySelectorAll('[role="dialog"],[aria-modal="true"]')];
+      for(const d of ds){
+        const r=d.getBoundingClientRect();
+        if(r.width>300 && r.height>300 && d.innerText.toLowerCase().includes('elevenlabs')){
+          return d;
         }
       }
-    },300);
+      // Fallback: locate "Powered by ElevenLabs" and climb
+      for(const el of walk()){
+        if(el.textContent && el.textContent.toLowerCase().includes('powered by elevenlabs')){
+          let n=el;
+          while(n && n!==document.body){
+            const r=n.getBoundingClientRect();
+            if(r.width>300 && r.height>300) return n;
+            n=n.parentElement;
+          }
+        }
+      }
+      return null;
+    }
+    function syncSlotHeight(){
+      const helper=document.getElementById('helper-card');
+      const slot=document.getElementById('bot-slot');
+      if(helper && slot){
+        slot.style.minHeight = Math.max(560, helper.offsetHeight) + 'px';
+      }
+    }
+    function pinOverlay(){
+      const overlay=findOverlay();
+      const slot=document.getElementById('bot-slot');
+      if(!overlay || !slot) return;
+      const rect=slot.getBoundingClientRect();
+      Object.assign(overlay.style,{
+        position:'fixed',
+        left:`${rect.left}px`,
+        top:`${rect.top}px`,
+        width:`${rect.width}px`,
+        height:`${rect.height}px`,
+        transform:'none',
+        margin:'0',
+        zIndex:'1000'
+      });
+    }
+
+    /* -------- Auto-accept T&Cs and auto-start call -------- */
+    function clickIf(predicate){
+      for(const el of walk()){
+        if(el.tagName==='BUTTON' && predicate(el)){
+          el.click();
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function tryAccept(){
+      // Buttons may say "Accept" or similar
+      return clickIf(b=>{
+        const t=b.textContent?.trim().toLowerCase();
+        return t==='accept' || t==='agree' || t==='i agree';
+      });
+    }
+
+    function tryStartCall(){
+      // Look for a call/start button by aria-label or text
+      const ok = clickIf(b=>{
+        const aria=(b.getAttribute('aria-label')||'').toLowerCase();
+        const t=b.textContent?.trim().toLowerCase()||'';
+        const name=aria || t;
+        return /call|start|begin|talk|speak/.test(name);
+      });
+      if(ok) return true;
+
+      // Fallback: click the most prominent primary button inside overlay
+      const overlay=findOverlay();
+      if(!overlay) return false;
+      const btn=[...overlay.querySelectorAll('button')].find(x=>{
+        const r=x.getBoundingClientRect();
+        return r.width>44 && r.height>44;
+      });
+      if(btn){ btn.click(); return true; }
+      return false;
+    }
+
+    // Observe once; when overlay appears, pin it, accept, then start.
+    const mo=new MutationObserver(()=>{
+      const overlay=findOverlay();
+      if(!overlay) return;
+
+      syncSlotHeight();
+      pinOverlay();
+
+      // Try repeatedly for a short window to beat async widget loads
+      let tries=0;
+      const timer=setInterval(()=>{
+        tries++;
+        // Accept terms if visible
+        tryAccept();
+        // Attempt to start the call
+        tryStartCall();
+        // Keep overlay pinned
+        pinOverlay();
+
+        if(tries>40){ clearInterval(timer); } // stop after ~10s
+      },250);
+
+      window.addEventListener('resize', ()=>{ syncSlotHeight(); pinOverlay(); });
+      mo.disconnect();
+    });
+    mo.observe(document.body,{subtree:true,childList:true});
+
+    // Initial pass on load
+    window.addEventListener('load', ()=>{ syncSlotHeight(); pinOverlay(); });
   </script>
 </body>
 </html>
