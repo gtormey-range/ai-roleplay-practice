@@ -47,28 +47,21 @@
     .info p{ margin:0 0 12px; }
     .callout{ color:#666; font-size:14px; }
 
-    /* Right bot container */
+    /* Right bot directly */
     .bot{
-      background:var(--card);
-      border-radius:20px;
-      box-shadow:0 12px 30px rgba(0,0,0,.08);
-      padding:12px;
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:center;
-      min-height:560px;
     }
     .bot > *{
       width:100%;
       height:100%;
       border:0;
-      border-radius:14px;
     }
 
     /* Responsive */
     @media (max-width: 900px){
       .stage{ grid-template-columns:1fr; }
-      .bot{ min-height:520px; }
     }
   </style>
 </head>
